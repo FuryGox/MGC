@@ -35,8 +35,23 @@ export default function HomeLayout() {
     <Stack>
       <Stack.Screen
         name="index"
+
         options={{
-          title: "Home",
+          headerBackVisible: false,
+          headerSearchBarOptions: {
+            placeholder: "Search",
+            onChangeText: (e) => {
+
+              if (e.nativeEvent.text.length > 3) {
+                console.log(e.nativeEvent.text);
+              }
+            },
+            onCancelButtonPress: () => {
+              console.log("cancel");
+            },
+          },
+
+          headerTitle: "Home",
           headerRight: () => <ThemeToggle />,
         }}
       />

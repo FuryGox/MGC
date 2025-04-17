@@ -6,20 +6,22 @@ import { Text } from "~/components/ui/text";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { Firm_API_Card } from "~/lib/datatype/api/firm";
 import { router } from "expo-router";
+import PageButton from "~/components/paging/page_button";
 
 export default function HomePage() {
     const [firms, setFirms] = useState<Firm_API_Card[]>([]);
     const [totalPages, setTotalPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
+    const [dataLoading, setDataLoading] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const {updatedFirms , pageInfo} = await getUpdatedFirm_page({ page: 1 });
+                const { updatedFirms, pageInfo } = await getUpdatedFirm_page({ page: 1 });
                 setFirms(updatedFirms);
-                setTotalPages(pageInfo.totalPages); 
+                setTotalPages(pageInfo.totalPages);
                 setCurrentPage(pageInfo.currentPage);
             } catch (err: any) {
                 setError(err.message);
@@ -50,10 +52,11 @@ export default function HomePage() {
         <View className="flex flex-1 bg-background dark:bg-background-dark">
             <FlatList
                 data={firms}
+                
                 renderItem={({ item }) => (
-                    <Pressable 
-                    onPress={() => router.navigate(`/(main)/firm_detail/${item.slug}`)}
-                    className="flex flex-row items-center p-4 border-b border-gray-200 dark:border-gray-700">
+                    <Pressable
+                        onPress={() => router.navigate(`/(main)/firm_detail/${item.slug}`)}
+                        className="flex flex-row items-center p-4 border-b border-gray-200 dark:border-gray-700">
                         <Image
                             source={{ uri: item.thumbnail }}
                             className="w-16 h-16 rounded-md"
@@ -71,30 +74,26 @@ export default function HomePage() {
                 )}
             />
             {currentPage < totalPages && (
-                <Pressable
-                    onPress={async () => {
-                        setLoading(true);
-                        try {
-                            const { updatedFirms, pageInfo } = await getUpdatedFirm_page({ page: currentPage + 1 });
-                            setFirms((prevFirms) => [...prevFirms, ...updatedFirms]);
+                <PageButton currentPage={currentPage} totalPages={totalPages} onPageChange={(page) => {
+                    setDataLoading(true);
+                    setCurrentPage(page);
+                    getUpdatedFirm_page({ page })
+                        .then(({ updatedFirms, pageInfo }) => {
+                            setFirms(updatedFirms);
                             setTotalPages(pageInfo.totalPages);
                             setCurrentPage(pageInfo.currentPage);
-                        } catch (err: any) {
-                            setError(err.message);
-                        } finally {
-                            setLoading(false);
                         }
-                    }}
-                    className="p-4 bg-blue-500 rounded-md shadow-md"
-                >
-                    <Text className="text-white text-center">Load More</Text>
-                </Pressable>
+                        )
+                        .catch((err: any) => {
+                            setError(err.message);
+                        }
+                        )
+                        .finally(() => {
+                            setDataLoading(false);
+                        }
+                        );
+                }} />
             )}
-            <View className="p-4 bg-gray-100 dark:bg-gray-800 rounded-md shadow-md mt-4">
-                <Text className="text-sm text-gray-500 dark:text-gray-400">
-                    Page {currentPage} of {totalPages}
-                </Text>
-            </View>
         </View>
     );
 }
