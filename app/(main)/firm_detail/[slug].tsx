@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import {useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { Stack } from "expo-router";
 import { Pressable, ScrollView, View } from 'react-native';
@@ -8,6 +8,7 @@ import { Image } from "react-native";
 import { Firm_API_Info, Firm_API_server } from '~/lib/datatype/api/firm';
 export default function FirmDetailLayout() {
   const { slug } = useLocalSearchParams()
+  const router = useRouter();
   const [firmData, setFirmData] = React.useState<Firm_API_Info>();
   const [episodes, setEpisodes] = React.useState<Firm_API_server[]>();
   const [loading, setLoading] = React.useState(true);
@@ -87,7 +88,17 @@ export default function FirmDetailLayout() {
                     </Text>
                     {server.server_data.map((episode) => (
                       <Pressable
-                        onPress={() => router.navigate(`/(main)/player/${episode.slug}`)}
+                        onPress={() => router.push({ 
+                          pathname: `/(main)/player`,
+                          params: {
+                            link_embed: episode.link_embed,
+                            link_m3u8: episode.link_m3u8,
+                            filename: episode.filename,
+                            name: episode.name,
+                            slug: episode.slug,
+                            server_name: server.server_name,
+                          }
+                        } )}
                         key={episode.slug} className="mt-2">
                         <Text className="text-sm text-gray-500 dark:text-gray-400">
                           {episode.name}

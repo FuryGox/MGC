@@ -4,9 +4,8 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import { StyleSheet, View, Button } from 'react-native';
 import { Text } from '~/components/ui/text';
 export default function PlayerScreen() {
-  const { slug } = useLocalSearchParams()
-  const videoSource =
-    'https://s5.phim1280.tv/20250408/ac35qg7w/index.m3u8';
+  const { link_embed , link_m3u8 , filename , name , slug , server_name } = useLocalSearchParams();
+  const videoSource: string = Array.isArray(link_m3u8) ? link_m3u8[0] : link_m3u8 || '';
   const player = useVideoPlayer(videoSource, player => {
     player.loop = true;
     player.play();
