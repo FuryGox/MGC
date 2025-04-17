@@ -23,3 +23,16 @@ export interface Firm_API_Info {
     total_episodes: string;
     quality: string;
 }
+
+export interface Firm_API_episode {
+    name: string;
+    slug: string;
+    filename: string;
+    link_embed: string;
+    link_m3u8: string;
+}
+
+export interface Firm_API_server {
+    server_name: string;
+    server_data: Firm_API_episode[]
+}

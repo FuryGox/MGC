@@ -1,14 +1,15 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { Stack } from "expo-router";
-import { View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from '~/components/ui/text';
 import getFirmInfo from '~/api/getfirm-info';
 import { Image } from "react-native";
-import { Firm_API_Info } from '~/lib/datatype/api/firm';
+import { Firm_API_Info, Firm_API_server } from '~/lib/datatype/api/firm';
 export default function FirmDetailLayout() {
   const { slug } = useLocalSearchParams()
   const [firmData, setFirmData] = React.useState<Firm_API_Info>();
+  const [episodes, setEpisodes] = React.useState<Firm_API_server[]>();
   const [loading, setLoading] = React.useState(true);
   const [loaderror, setLoadError] = React.useState<Error | undefined>();
   React.useEffect(() => {
@@ -17,8 +18,9 @@ export default function FirmDetailLayout() {
   const fetchFirmData = async () => {
     try {
       if (typeof slug === 'string') {
-        const data = await getFirmInfo(slug);
-        setFirmData(data);
+        const { firmInfo, episodes } = await getFirmInfo(slug);
+        setFirmData(firmInfo);
+        setEpisodes(episodes);
       } else {
         throw new Error('Invalid slug format');
       }
@@ -46,38 +48,61 @@ export default function FirmDetailLayout() {
             Error: {loaderror.message}
           </Text>
         ) : (
-          <View className="flex-1 items-center justify-center">
-            <Image
-              source={{ uri: firmData?.poster_url }}
-              className="w-[300px] h-[400px] rounded-md"
-              resizeMode="cover"
-            />
-            <Text className="text-lg text-black dark:text-white">{firmData?.name}</Text>
-            <Text className="text-sm text-gray-500 dark:text-gray-400">
-              {firmData?.origin_name}
-            </Text>
-            <Text className="text-sm text-gray-500 dark:text-gray-400">
-              {firmData?.content}
-            </Text>
-            <Text className="text-sm text-gray-500 dark:text-gray-400">
-              Status: {firmData?.status}
-            </Text>
-            <Text className="text-sm text-gray-500 dark:text-gray-400">
-              Type: {firmData?.type}
-            </Text>
-            <Text className="text-sm text-gray-500 dark:text-gray-400">
-              Time: {firmData?.time}
-            </Text>
-            <Text className="text-sm text-gray-500 dark:text-gray-400">
-              Current Episode: {firmData?.current_episode}
-            </Text>
-            <Text className="text-sm text-gray-500 dark:text-gray-400">
-              Total Episodes: {firmData?.total_episodes}
-            </Text>
-            <Text className="text-sm text-gray-500 dark:text-gray-400">
-              Quality: {firmData?.quality}
-            </Text>
-          </View>
+          <ScrollView>
+            <View className="flex-1 items-center justify-center">
+              <Image
+                source={{ uri: firmData?.poster_url }}
+                className="w-[300px] h-[400px] rounded-md"
+                resizeMode="cover"
+              />
+              <Text className="text-lg text-black dark:text-white">{firmData?.name}</Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">
+                {firmData?.origin_name}
+              </Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">
+                {firmData?.content}
+              </Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">
+                Status: {firmData?.status}
+              </Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">
+                Type: {firmData?.type}
+              </Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">
+                Time: {firmData?.time}
+              </Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">
+                Current Episode: {firmData?.current_episode}
+              </Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">
+                Total Episodes: {firmData?.total_episodes}
+              </Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-400">
+                Quality: {firmData?.quality}
+              </Text>
+              <View>
+                {episodes?.map((server) => (
+                  <View key={server.server_name} className="mt-4">
+                    <Text className="text-lg text-black dark:text-white">
+                      {server.server_name}
+                    </Text>
+                    {server.server_data.map((episode) => (
+                      <Pressable
+                        onPress={() => router.navigate(`/(main)/player/${episode.slug}`)}
+                        key={episode.slug} className="mt-2">
+                        <Text className="text-sm text-gray-500 dark:text-gray-400">
+                          {episode.name}
+                        </Text>
+                        <Text className="text-sm text-gray-500 dark:text-gray-400">
+                          {episode.filename}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
         )}
       </View>
     </View>
