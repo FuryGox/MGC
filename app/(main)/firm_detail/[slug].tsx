@@ -35,7 +35,6 @@ export default function FirmDetailLayout() {
       <Stack.Screen
         name="index"
         options={{
-          headerBackVisible: false,
           headerTitle: "Firm Detail",
           headerRight: () => <Text className="text-sm text-black dark:text-white">Right</Text>,
         }}
